@@ -11,8 +11,12 @@ class Board(object):
     def __init__(self, board):
         self.board = board
 #        for i,b in enumerate(self.board):
-#             print("i: " + str(i) + " b: " + str(b) + "\n")           
+#             print("i: " + str(i) + " b: " + str(b) + "\n")   
+#        print()
         return
+    
+    def __repr__(self):
+        return str(self.board)
     
     def moveEmptyTile(self, st): #move empty tile
         indexEmptySpace = 0
@@ -27,12 +31,12 @@ class Board(object):
                 indexEmptySpace = i
                 break
         
-        print("index empty space: " + str(indexEmptySpace))
-        print()
+#        print("index empty space: " + str(indexEmptySpace))
+#        print()
             
         if indexEmptySpace - 3 >= 0:  #can moveUp
-            print("UP")
-            print()
+#            print("UP")
+#            print()
             upBoard = list(self.board)
             value = upBoard[indexEmptySpace - 3]
             upBoard[indexEmptySpace] = value
@@ -43,8 +47,8 @@ class Board(object):
             st.childs.append(s)
          
         if indexEmptySpace + 3 <= 8: #can moveDown
-            print("DOWN")
-            print()
+#            print("DOWN")
+#            print()
             downBoard = list(self.board)
             value = downBoard[indexEmptySpace + 3]
             downBoard[indexEmptySpace] = value
@@ -52,12 +56,13 @@ class Board(object):
                 
             b = Board(downBoard)
             
+            
             st.childs.append(State(b))
        
         
         if indexEmptySpace != 0 and indexEmptySpace != 3 and indexEmptySpace != 6: #cam moveLeft
-            print("LEFT")
-            print()
+#            print("LEFT")
+#            print()
             leftBoard = list(self.board)
             value = leftBoard[indexEmptySpace - 1]
             leftBoard[indexEmptySpace] = value
@@ -71,8 +76,8 @@ class Board(object):
         
             
         if indexEmptySpace != 2 and indexEmptySpace != 5 and indexEmptySpace != 8: #can moveRight
-            print("RIGHT")
-            print()
+#            print("RIGHT")
+#            print()
             rightBoard = self.board
             value = rightBoard[indexEmptySpace + 1]
             rightBoard[indexEmptySpace] = value

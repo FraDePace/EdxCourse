@@ -13,7 +13,21 @@ class State(object):
     
     def __init__(self, board):
         self.board = board
+        print(str(self.board))
         return
+    
+    def __repr__(self):
+        return "State(%s)" % (self.board)
+    
+    def __eq__(self, other):
+        if isinstance(other, State):
+            return ((self.board == other.board))
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     def calculateNeighbours(self):
         
         #try to move the empty tile
