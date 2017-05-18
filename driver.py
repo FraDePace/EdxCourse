@@ -245,6 +245,8 @@ from board import Board
 #    print("stat1 != stat2")
 
 
+
+
 if len(argv) != 3:
     print("Error number of elements in the command line!")
     
@@ -261,6 +263,9 @@ print()
 goalList = []
 for i in range(9):
     goalList.append(i)
+    
+goalBoard = Board(goalList)
+goalState = State(goalBoard)
 
 #BFS
 
@@ -273,7 +278,11 @@ if algorithm == "bfs":
     
     #create initial State
     print("Initial State")
+    
     initialState = State(initialBoard)
+    initialState.depth = 0
+    
+  
     
     #create frontier ----> queue FIFO
     #frontier = queue.Queue()
@@ -289,97 +298,97 @@ if algorithm == "bfs":
     #frontier.put(initialState)
     frontier.append(initialState)
     
-#    while len(frontier)>0:
-#        frontier.reverse()
-#        #currentState = frontier.get()
-#        currentState = frontier.pop()
-#        explored.add(currentState)
-#        
-#        #check if it is the Goal State
-#        if currentState.board == goalList:
-#            print("Goal State Found!")
-#            break
-#        
-#        currentState.calculateNeighbours()
-#        
-#        if len(currentState.childs) > 0:
-#            for c in currentState.childs:
-#                
-#                #check if is not equal with cirrent state
-#                if c != currentState:
-#                     #check if the child State is not in the explored
-#                     present = c in explored
-#                     if present == False:  #has not been explored
-#                         front = list(frontier)
-#                         
-#                         if len(front) > 0:
-#                             found = False
-#                             for f in front:
-#                                 if f == c:
-#                                     found = True
-#                                     break
-#                             if found == False:
-#                                 frontier.append(c)
-#                         else:
-#                             frontier.append(c)
-#                
-for i in range(2):
-    print("-------------------------------------------")
-    frontier.reverse()
+    while len(frontier)>0:
+        frontier.reverse()
         #currentState = frontier.get()
-    currentState = frontier.pop()
-    explored.add(currentState)
+        currentState = frontier.pop()
+        explored.add(currentState)
         
         #check if it is the Goal State
-    if currentState.board == goalList:
-        print("Goal State Found!")
+        if currentState.board == goalState.board:
+            print("Goal State Found!")
+            print("depth: " + str(currentState.depth))
+            break
         
-    print("neighbors")       
-    currentState.calculateNeighbours()
-    print()
-    print("frontier BEFORE")                
-    for f in frontier:
-        print(str(f.board))
-    print()
-    print("explored BEFORE")
-    for e in explored:
-        print(str(e.board))
-    print()
-    
-    
-    if len(currentState.childs) > 0:
-        for c in currentState.childs:
+        currentState.calculateNeighbours()
+        
+        frontier.reverse()
+        
+        if len(currentState.childs) > 0:
+            for c in currentState.childs:
                 
+                #check if is not equal with cirrent state
+                if c != currentState:
+                     #check if the child State is not in the explored
+                     present = c in explored
+                     if present == False:  #has not been explored
+                         front = list(frontier)
+                         
+                         if len(front) > 0:
+                             found = False
+                             for f in front:
+                                 if f.board == c.board:
+                                     found = True
+                                     break
+                             if found == False:
+                                 frontier.append(c)
+                         else:
+                             frontier.append(c)
                 
-            if c != currentState:
-                
-                    
-                present = c in explored
-                
-                if present == False:  #has not been explored
-                    front = list(frontier)
-                    print(len(front))
-                    if len(front) > 0:
-                        found = False
-                        for f in front:
-                            if f == c:
-                                found = True
-                                break
-                        if found == False:
-                            
-                            frontier.append(c)
-                    else:
-                        frontier.append(c)
-                        
-                   
-    print("frontier AFTER")                
-    for f in frontier:
-        print(str(f.board))
-    print()
-    print("explored AFTER")
-    for e in explored:
-        print(str(e.board))
-    print()
+#for i in range(2):
+#    print("-------------------------------------------")
+#    frontier.reverse()
+#        #currentState = frontier.get()
+#    currentState = frontier.pop()
+#   
+#    explored.add(currentState)
+#        
+#        #check if it is the Goal State
+#    if currentState.board == goalState.board:
+#        print("Goal State Found!")
+#        
+#          
+#    currentState.calculateNeighbours()
+#    
+#    
+#    frontier.reverse()
+#              
+#    
+#    
+#    
+#    if len(currentState.childs) > 0:
+#        for c in currentState.childs:
+#                
+#                
+#            if c != currentState:
+#                
+#                    
+#                present = c in explored
+#                
+#                if present == False:  #has not been explored
+#                    front = list(frontier)
+#                    print(len(front))
+#                    if len(front) > 0:
+#                        found = False
+#                        for f in front:
+#                            if f.board == c.board:
+#                                found = True
+#                                break
+#                        if found == False:
+#                            
+#                            frontier.append(c)
+#                    else:
+#                        frontier.append(c)
+#                        
+#                   
+#    print("frontier AFTER")                
+#    for f in frontier:
+#        print(str(f.board))
+#    print()
+#    print("explored AFTER")
+#    for e in explored:
+#        print(str(e.board))
+#    print()
     
                
                         

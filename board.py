@@ -18,6 +18,15 @@ class Board(object):
     def __repr__(self):
         return str(self.board)
     
+    def __eq__(self, other):
+        if isinstance(other, Board):
+            return ((self.board == other.board))
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     def moveEmptyTile(self, st): #move empty tile
         indexEmptySpace = 0
         
@@ -44,6 +53,7 @@ class Board(object):
             
             b = Board(upBoard)
             s = State(b)
+            s.depth = st.depth + 1
             st.childs.append(s)
          
         if indexEmptySpace + 3 <= 8: #can moveDown
@@ -55,9 +65,9 @@ class Board(object):
             downBoard[indexEmptySpace + 3] = 0
                 
             b = Board(downBoard)
-            
-            
-            st.childs.append(State(b))
+            s = State(b)
+            s.depth = st.depth + 1
+            st.childs.append(s)
        
         
         if indexEmptySpace != 0 and indexEmptySpace != 3 and indexEmptySpace != 6: #cam moveLeft
@@ -69,8 +79,9 @@ class Board(object):
             leftBoard[indexEmptySpace - 1] = 0
                  
             b = Board(leftBoard)
-            
-            st.childs.append(State(b))
+            s = State(b)
+            s.depth = st.depth + 1
+            st.childs.append(s)
                  
             
         
@@ -84,7 +95,8 @@ class Board(object):
             rightBoard[indexEmptySpace + 1] = 0
                  
             b = Board(rightBoard)
-            
-            st.childs.append(State(b))
+            s = State(b)
+            s.depth = st.depth + 1
+            st.childs.append(s)
             
           

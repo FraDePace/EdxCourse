@@ -11,9 +11,12 @@ class State(object):
     
     childs = []
     
+    depth = -1
+    
+    
     def __init__(self, board):
         self.board = board
-        print(str(self.board))
+        
         return
     
     def __repr__(self):
