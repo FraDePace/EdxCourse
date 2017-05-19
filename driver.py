@@ -5,11 +5,11 @@
 #@author: FraDepa
 #"""
 #
-import queue
-import heapq
+
 from sys import argv
 from state import State
 from board import Board
+from collections import deque
 #
 #def hello():
 #    print("Hello World")
@@ -63,16 +63,7 @@ from board import Board
 #
 ##Heap
 #
-#heap = []
-#data = [2,19,45,3,89,1]
-#
-#print("Heap:")
-#
-#for d in data:
-#    print("Add %d" % d)
-#    heapq.heappush(heap, d)
-#    
-#print()
+
 #
 #for i in range(len(data)):
 #    smallest = heapq.heappop(heap)
@@ -83,166 +74,105 @@ from board import Board
 #print("Your first variable is:", first)
 #print("Your second variable is:", second)
 #print("Your third variable is:", third)
-#
-#    
-#
 
-#class Prova(object):
-#    
-#    def __init__(self, name):
-#        self.name = name
-#        return
-#    def __repr__(self):
-#        return "Prova(%s)" % (self.name)
-#    def __eq__(self, other):
-#        if isinstance(other, Prova):
-#            return ((self.name == other.name))
-#        else:
-#            return False
-#    def __hash__(self):
-#        return hash(self.__repr__())
-#        
-#
-#
-#a = set()
-#a.add(Prova("Marco"))
-#a.add(Prova("Piero"))
-#a.add(Prova("Gianna"))
-#
-#print(len(a))
-#
-#p = Prova("Piero")
-#p1 = Prova("Alessandro")
-#
-#print(p in a)
-#print(p1 in a)
-
-
-
-
-
-#print(s2 in a)
-#print(s3 in a)
-#print()
-
-#frontier = queue.Queue()
-#
-#l = []
-#for i in range(3):  #0,1,2
-#    l.append(i)
-#    
-#s = State(l) #State(0,1,2)
-#
-#r = []
-#r.append(1)
-#r.append(2)
-#r.append(7)
-#
-#s1 = State(r) #State(1,2,7)
-#
-#
-#frontier.put(s)
-#frontier.put(s1)
-#
-##################################à
-#s2 = State(r) #State(1,2,7)
-#
-#w = []
-#w.append(4)
-#w.append(9) #State(4,9)
-#
-#s3 = State(w)
-#
-#print("f")
-#
-#
-#
-#
-#while not frontier.empty():
-#    ff = frontier.get()
-#    print("ff: " + str(ff))
-#    print("s2: " + str(s2))
-#    print("s3: " + str(s3))
-#    if s2 == ff:
-#        print("s2 == ff")
-#    else:
-#        print("s2 != ff")
-#        
-#    if s3 == ff:
-#        print("s3 == ff")
-#    else:
-#        print("s3 != ff")
-#    print()
-#    
-#    print(frontier.qsize())
-#    
-#   
-#print()
-#print("Array")
-#array = []
-#
-#for i in range(7):
-#    array.append(i)
-#    
-#for a in array:
-#    print(a)
-#    
-#print()
-#    
-#
-#array.reverse()
-#a1 = array.pop()
-#
-#print("a1:" + str(a1))
-#
-#print()
-#for a in array:
-#    print(a)
-#    
-#
-#array.append(a1)
-#array.reverse()
-#print()
-#for a in array:
-#    print(a)
-#    
+#q = deque(range(5))
+#print(q)
 #print()
 #
-#array.append(7)
-#for a in array:
-#    print(a)
-#
-#array.reverse()
+#q.append(5)
+#print(q)
 #print()
-#print(array.pop())
+#
+#q.appendleft(-1)
+#print(q)
+#print()
+#
+#a = q.pop()
+#print("pop: " + str(a))
+#print(q)
+#print()
+#
+#c = q.popleft()
+#print("pop left: " + str(c))
+#print(q)
+#print()
+#
+#b = 1
+#present = b in q
+#print(present)
+#
+#b = -1
+#present = b in q
+#print(present)
 
-#puzzleS = argv[2]
-#puzzleL =  [int(x) for x in puzzleS.split(',')]
-#
-#stat1 = State(puzzleL)
-#
-#
-#
-#stat2 = State(puzzleL)
-#
-#if stat1 == stat2:
-#    print("stat1 == stat2")
-#else:
-#    print("stat1 != stat2")
-#
-#
-#for i in range(3):
-#    stat1.childs.append(i)
-#
-#for i in range(7):
-#    stat2.childs.append(i)
-#
-#print(stat1.childs)
-#
-#if stat1 == stat2:
-#    print("stat1 == stat2")
-#else:
-#    print("stat1 != stat2")
+class Node(object):
+    
+    parentNode = None
+    childs = ()
+    
+    def __init__(self, parentNode, board, action, depth):
+        self.parentNode = parentNode
+        self.board = board
+        self.action = action
+        self.depth = depth
+            
+        
+    def calculateChilds(self):
+        
+        for i,b in enumerate(self.board):
+            if b == 0:
+                indexEmptySpace = i
+                break
+            
+        listNode = []
+        
+        if indexEmptySpace - 3 >= 0:  #can moveUp
+
+            upBoard = list(self.board)
+            value = upBoard[indexEmptySpace - 3]
+            upBoard[indexEmptySpace] = value
+            upBoard[indexEmptySpace - 3] = 0
+            
+            n = Node(self, upBoard, "UP", self.depth + 1)
+            listNode.append(n)
+         
+        if indexEmptySpace + 3 <= 8: #can moveDown
+
+            downBoard = list(self.board)
+            value = downBoard[indexEmptySpace + 3]
+            downBoard[indexEmptySpace] = value
+            downBoard[indexEmptySpace + 3] = 0
+                
+            
+            n = Node(self, downBoard, "DOWN", self.depth + 1)
+            listNode.append(n)
+       
+        
+        if indexEmptySpace != 0 and indexEmptySpace != 3 and indexEmptySpace != 6: #cam moveLeft
+
+            leftBoard = list(self.board)
+            value = leftBoard[indexEmptySpace - 1]
+            leftBoard[indexEmptySpace] = value
+            leftBoard[indexEmptySpace - 1] = 0
+                 
+           
+            n = Node(self, leftBoard, "LEFT", self.depth + 1)
+            listNode.append(n)
+            
+        if indexEmptySpace != 2 and indexEmptySpace != 5 and indexEmptySpace != 8: #can moveRight
+
+            rightBoard = self.board
+            value = rightBoard[indexEmptySpace + 1]
+            rightBoard[indexEmptySpace] = value
+            rightBoard[indexEmptySpace + 1] = 0
+                 
+            
+            n = Node(self, rightBoard, "RIGHT", self.depth + 1)
+            listNode.append(n)
+        
+        t = tuple(listNode)
+        self.childs = self.childs + t
+        
 
 
 
@@ -264,8 +194,16 @@ goalList = []
 for i in range(9):
     goalList.append(i)
     
-goalBoard = Board(goalList)
-goalState = State(goalBoard)
+print("goalList")
+print(goalList)
+print()
+    
+#goalBoard = Board(goalList)
+#goalState = State(None, goalBoard, "", 0)   #State(parent, board, action, depth)
+
+
+
+
 
 #BFS
 
@@ -274,123 +212,61 @@ if algorithm == "bfs":
     puzzleList =  [int(x) for x in puzzleString.split(',')]
     
     #create initial Board
-    initialBoard = Board(puzzleList);
+#    initialBoard = Board(puzzleList);
+
+    initialNode = Node(None, puzzleList, "", 0)
+    
+    print(algorithm)
     
     #create initial State
-    print("Initial State")
-    
-    initialState = State(initialBoard)
-    initialState.depth = 0
-    
-  
-    
-    #create frontier ----> queue FIFO
-    #frontier = queue.Queue()
-    frontier = []
-    
+#    print("Initial State")
 
+#    initialState = State(None, initialBoard, "", 0)
+#
+#    #create frontier ----> queue FIFO
+#    #frontier = queue.Queue()
+#    
+#    #create frontier ----> double-ended queue
+    frontier = deque()
+#    
     #create explored Set
     explored = set()
     print()
     print("create explored set: " + str(explored))
-    
-    #add initial state to the frontier
-    #frontier.put(initialState)
-    frontier.append(initialState)
-    
-    while len(frontier)>0:
-        frontier.reverse()
-        #currentState = frontier.get()
-        currentState = frontier.pop()
-        explored.add(currentState)
+#    
+#    
+#    #add initial state to the frontier
+    frontier.append(initialNode)
+#    
+    while len(frontier) > 0:
+#    for i in range(1):
+        print("------------------")
+        currentNode = frontier.popleft()
+        
+        explored.add(str(currentNode.board))
+        
         
         #check if it is the Goal State
-        if currentState.board == goalState.board:
+        if currentNode.board == goalList:
             print("Goal State Found!")
-            print("depth: " + str(currentState.depth))
+            print("depth: " + str(currentNode.depth))
             break
-        
-        currentState.calculateNeighbours()
-        
-        frontier.reverse()
-        
-        if len(currentState.childs) > 0:
-            for c in currentState.childs:
+
+        currentNode.calculateChilds()
+#
+        if len(currentNode.childs) > 0:
+            for c in currentNode.childs:
+
+                #check if the child State is not in the explored
+                present = str(c.board) in explored
+                if present == False:  #has not been explored
+                    present = c in frontier
+                    if present == False:
+                        frontier.append(c)
+                    
+                        
                 
-                #check if is not equal with cirrent state
-                if c != currentState:
-                     #check if the child State is not in the explored
-                     present = c in explored
-                     if present == False:  #has not been explored
-                         front = list(frontier)
-                         
-                         if len(front) > 0:
-                             found = False
-                             for f in front:
-                                 if f.board == c.board:
-                                     found = True
-                                     break
-                             if found == False:
-                                 frontier.append(c)
-                         else:
-                             frontier.append(c)
-                
-#for i in range(2):
-#    print("-------------------------------------------")
-#    frontier.reverse()
-#        #currentState = frontier.get()
-#    currentState = frontier.pop()
-#   
-#    explored.add(currentState)
-#        
-#        #check if it is the Goal State
-#    if currentState.board == goalState.board:
-#        print("Goal State Found!")
-#        
-#          
-#    currentState.calculateNeighbours()
-#    
-#    
-#    frontier.reverse()
-#              
-#    
-#    
-#    
-#    if len(currentState.childs) > 0:
-#        for c in currentState.childs:
-#                
-#                
-#            if c != currentState:
-#                
-#                    
-#                present = c in explored
-#                
-#                if present == False:  #has not been explored
-#                    front = list(frontier)
-#                    print(len(front))
-#                    if len(front) > 0:
-#                        found = False
-#                        for f in front:
-#                            if f.board == c.board:
-#                                found = True
-#                                break
-#                        if found == False:
-#                            
-#                            frontier.append(c)
-#                    else:
-#                        frontier.append(c)
-#                        
-#                   
-#    print("frontier AFTER")                
-#    for f in frontier:
-#        print(str(f.board))
-#    print()
-#    print("explored AFTER")
-#    for e in explored:
-#        print(str(e.board))
-#    print()
-    
-               
+
                         
                     
                     
