@@ -141,7 +141,7 @@ print("goalList")
 print(goalList)
 print()
 
-#
+
 #print("Prova OrderedDict")
 #
 #a = []
@@ -169,11 +169,15 @@ print()
 #print()
 #present = str(n2.board) in d
 #print(present)
-
+#
 #print("popitem")
-#nItem = d.popitem(False)  #get a tuple with FIFO
-#print(nItem[1])
+##nItem = d.popitem(False)  #get a tuple with FIFO
+#nItem = d.popitem(True)  #LIFO
+#print(nItem[0])
 #print()
+#for k,v in d.items():
+#    print(k)
+#    print(v)
 
 #while len(d) > 0:
 #   nItem = d.popitem(False)
@@ -184,78 +188,83 @@ print()
 f = open('output.txt', 'a')
 
 #BFS
+LIFO = False
+if algorithm == "dfs":
+    LIFO = True
 
-if algorithm == "bfs":
-    #get array of elements
-    puzzleList =  [int(x) for x in puzzleString.split(',')]
 
-    #create initial Node
-    initialNode = Node(None, puzzleList, "", 0)
+#get array of elements
+puzzleList =  [int(x) for x in puzzleString.split(',')]
 
-    print(algorithm)
+#create initial Node
+initialNode = Node(None, puzzleList, "", 0)
+
+print(algorithm)
 
 #    #create frontier ----> double-ended queue
 #    frontier = deque()
-    frontier = collections.OrderedDict()
+frontier = collections.OrderedDict()
 
     #create explored Set
-    explored = set()
-    print()
-    print("create explored set: " + str(explored))
+explored = set()
+print()
+print("create explored set: " + str(explored))
 
 #    #add initial state to the frontier
 #    frontier.append(initialNode)
-    frontier.update({str(initialNode.board):initialNode})
-    maxF = 0
+frontier.update({str(initialNode.board):initialNode})
+maxF = 0
 
-    it = 0
+it = 0
 #    while len(frontier) > 0:
-    while len(frontier) > 0:
+while len(frontier) > 0:
 
-        print("------------------")
-        print(it)
+    print("------------------")
+    print(it)
 #        currentNode = frontier.popleft()
-        currentNode = frontier.popitem(False)   #tuple
+    currentNode = frontier.popitem(LIFO)   #tuple
 #        explored.add(str(currentNode.board))
-        explored.add(currentNode[0])
+    explored.add(currentNode[0])
 
 
         #check if it is the Goal State
 #        if currentNode.board == goalList:
-        if currentNode[0] == str(goalList):
-            print("Goal State Found!")
+    if currentNode[0] == str(goalList):
+        print("Goal State Found!")
 
 #            currentNode.getParentStory()
+        if LIFO == False:
             currentNode[1].getParentStory()
 
             print("ACTION")
             ACTION.reverse()
             print(ACTION)
 
-            print("cost_of_path")
-            print(len(ACTION))
+        print("cost_of_path")
+        print(len(ACTION))
 
-            print("nodes_expanded")
-            print(it)
+        print("nodes_expanded")
+        print(it)
 
-            print("search_depth")
+        print("search_depth")
 #            print(currentNode.depth)
-            print(currentNode[1].depth)
+        print(currentNode[1].depth)
 
-            print("max_search_depth")
-            print(maxF)
+        print("max_search_depth")
+        print(maxF)
 
-            print("runnin_time")
-            print(time.time() - start_time)
+        print("runnin_time")
+        print(time.time() - start_time)
 
-            print("max_ram_usage")
-            memory()
-            break
+        print("max_ram_usage")
+        memory()
+        break
 
-        currentNode[1].calculateChilds()
-
-        if len(currentNode[1].childs) > 0:
+    currentNode[1].calculateChilds()
+        
+    if len(currentNode[1].childs) > 0:  #bfs
 #            for c in currentNode.childs:
+        if LIFO == False:
             for c in currentNode[1].childs:
 
                 #check if the child State is not in the explored
@@ -266,121 +275,132 @@ if algorithm == "bfs":
                         if c.depth > maxF:
                             maxF = c.depth
 #                        frontier.append(c)
-                        frontier.update({str(c.board):c})
-        it += 1
+                    frontier.update({str(c.board):c})
+        else:                                                 #dfs
+            for c in currentNode[1].childs[::-1]:
+                
+                present = str(c.board) in explored
+                if present == False:  #has not been explored
+                    present = str(c.board) in frontier.keys()
+                    if present == False:
+                        if c.depth > maxF:
+                            maxF = c.depth
+#                        frontier.append(c)
+                    frontier.update({str(c.board):c})
+    it += 1
 
 
-#DFS
-
-elif algorithm == "dfs":
-    #get array of elements
-    puzzleList =  [int(x) for x in puzzleString.split(',')]
-
-    #create initial Board
-#    initialBoard = Board(puzzleList);
-
-    initialNode = Node(None, puzzleList, "", 0)
-
-    print(algorithm)
-
-    #create initial State
-#    print("Initial State")
-
-#    initialState = State(None, initialBoard, "", 0)
+##DFS
 #
-#    #create frontier ----> queue FIFO
-#    #frontier = queue.Queue()
+#elif algorithm == "dfs":
+#    #get array of elements
+#    puzzleList =  [int(x) for x in puzzleString.split(',')]
 #
-#    #create frontier ----> double-ended queue
-    frontier = deque()
+#    #create initial Board
+##    initialBoard = Board(puzzleList);
 #
-    #create explored Set
-    explored = set()
-    print()
-    print("create explored set: " + str(explored))
+#    initialNode = Node(None, puzzleList, "", 0)
+#
+#    print(algorithm)
+#
+#    #create initial State
+##    print("Initial State")
+#
+##    initialState = State(None, initialBoard, "", 0)
+##
+##    #create frontier ----> queue FIFO
+##    #frontier = queue.Queue()
+##
+##    #create frontier ----> double-ended queue
+#    frontier = deque()
+##
+#    #create explored Set
+#    explored = set()
+#    print()
+#    print("create explored set: " + str(explored))
+##
+##
+##    #add initial state to the frontier
+#    frontier.append(initialNode)
+#
+#    maxF = 0
+#
+#    it = 0
+#   
+#    while len(frontier) > 0:
+##    for i in range(1):
+#        print("------------------")
+#        currentNode = frontier.pop()
+#
+#        explored.add(str(currentNode.board))
 #
 #
-#    #add initial state to the frontier
-    frontier.append(initialNode)
-
-    maxF = 0
-
-    it = 0
-   
-    while len(frontier) > 0:
-#    for i in range(1):
-        print("------------------")
-        currentNode = frontier.pop()
-
-        explored.add(str(currentNode.board))
-
-
-
-       # check if it is the Goal State
-        if currentNode.board == goalList:
-            print("Goal State Found!")
-            print(currentNode.board)
-            print("it")
-            print(it)
-            print()
-#            print("frontier")
-#            for f in frontier:
-#                print(f.board)
+#
+#       # check if it is the Goal State
+#        if currentNode.board == goalList:
+#            print("Goal State Found!")
+#            print(currentNode.board)
+#            print("it")
+#            print(it)
 #            print()
-#            currentNode.getParentStory()
+##            print("frontier")
+##            for f in frontier:
+##                print(f.board)
+##            print()
+##            currentNode.getParentStory()
+##
+##            print("ACTION")
+##            ACTION.reverse()
+##            print(ACTION)
 #
-#            print("ACTION")
-#            ACTION.reverse()
-#            print(ACTION)
-
-            print("cost_of_path")
-            print(len(ACTION))
-
-            print("nodes_expanded")
-            print(it)
-
-            print("search_depth")
-            print(currentNode.depth)
-
-            print("max_search_depth")
-            print(maxF)
-
-            print("running_time")
-            print(time.time() - start_time)
-
-            print("max_ram_usage")
-            memory()
-            break
-
-        currentNode.calculateChilds()
-
-        
-        if len(currentNode.childs) > 0:
-            for c in currentNode.childs[::-1]:
-                
-                if c.board == goalList:
-                    print("Goal state found at it: " + str(it))
-                    presentE = str(c.board) in explored
-                    presentF = c in frontier
-                    print(str(presentE) + " " + str(presentF))
-
-                presentE = str(c.board) in explored
-                presentF = c in frontier
-                
-                if presentE == False and presentF == False: 
-                    
-#                    if c.board == goalList:
-#                        print("Goal state added")
-#                        print("it goal state: " + str(it))
-                    if c.depth > maxF:
-                        maxF = c.depth
-                    frontier.append(c)
-                    print(len(frontier))
-                    
-        
-      
-                
-        it += 1
+#            print("cost_of_path")
+#            print(len(ACTION))
+#
+#            print("nodes_expanded")
+#            print(it)
+#
+#            print("search_depth")
+#            print(currentNode.depth)
+#
+#            print("max_search_depth")
+#            print(maxF)
+#
+#            print("running_time")
+#            print(time.time() - start_time)
+#
+#            print("max_ram_usage")
+#            memory()
+#            break
+#
+#        currentNode.calculateChilds()
+#
+#        
+#        if len(currentNode.childs) > 0:
+#            for c in currentNode.childs[::-1]:
+#                
+#                if c.board == goalList:
+#                    print("Goal state found at it: " + str(it))
+#                    presentE = str(c.board) in explored
+#                    presentF = c in frontier
+#                    print(str(presentE) + " " + str(presentF))
+#
+#                presentE = str(c.board) in explored
+#                presentF = c in frontier
+#                
+#                if presentE == False and presentF == False: 
+#                    
+##                    if c.board == goalList:
+##                        print("Goal state added")
+##                        print("it goal state: " + str(it))
+#                    if c.depth > maxF:
+#                        maxF = c.depth
+#                    frontier.append(c)
+#                    print(len(frontier))
+#                    
+#        
+#      
+#                
+#        it += 1
 
 
 
