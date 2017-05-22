@@ -7,9 +7,9 @@
 #
 
 from sys import argv
-from state import State
-from board import Board
 from collections import deque
+import time
+
 #
 #def hello():
 #    print("Hello World")
@@ -105,6 +105,24 @@ from collections import deque
 #present = b in q
 #print(present)
 
+#get start time
+start_time = time.time()
+
+ACTION = []
+
+def memory():
+    
+   import sys
+   if sys.platform == "win32":
+       import psutil
+       print("psutil", psutil.Process().memory_info().rss)
+   else:
+       # Note: if you execute Python from cygwin,
+       # the sys.platform is "cygwin"
+       # the grading system's sys.platform is "linux2"
+       import resource
+       print("resource", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
 class Node(object):
     
     parentNode = None
@@ -172,6 +190,29 @@ class Node(object):
         
         t = tuple(listNode)
         self.childs = self.childs + t
+    
+    def getParentStory(self):
+        
+        if self.parentNode.action == "":
+            ACTION.append(self.action)
+            return -1
+        else:
+            ACTION.append(self.action)
+            return self.parentNode.getParentStory()
+        
+#       print(self.action) 
+#        
+#       parent = self.parentNode
+#       print(parent.action)
+#       
+#       pparent = parent.parentNode
+#       print(pparent.action)
+#       
+#       if pparent.parentNode.action == "":
+#           print(-1)
+        
+        
+        
         
 
 
@@ -202,6 +243,8 @@ print()
 #goalState = State(None, goalBoard, "", 0)   #State(parent, board, action, depth)
 
 
+#Open output.txt file
+f = open('output.txt', 'a')
 
 
 
@@ -237,6 +280,9 @@ if algorithm == "bfs":
 #    
 #    #add initial state to the frontier
     frontier.append(initialNode)
+    
+    maxF = 0
+    
 #    
     while len(frontier) > 0:
 #    for i in range(1):
@@ -246,10 +292,34 @@ if algorithm == "bfs":
         explored.add(str(currentNode.board))
         
         
+        
         #check if it is the Goal State
         if currentNode.board == goalList:
             print("Goal State Found!")
-            print("depth: " + str(currentNode.depth))
+            
+            currentNode.getParentStory()
+            
+            print("ACTION")
+            ACTION.reverse()
+            print(ACTION)
+            
+            print("cost_of_path")
+            print(len(ACTION))
+            
+            print("nodes_expanded")
+            print(len(frontier) -1)
+            
+            print("search_depth")
+            print(currentNode.depth)
+            
+            print("max_search_depth")
+            print(maxF)
+            
+            print("runnin_time")
+            print(time.time() - start_time)
+            
+            print("max_ram_usage")
+            memory()
             break
 
         currentNode.calculateChilds()
@@ -262,8 +332,11 @@ if algorithm == "bfs":
                 if present == False:  #has not been explored
                     present = c in frontier
                     if present == False:
+                        if c.depth > maxF:
+                            maxF = c.depth
                         frontier.append(c)
                     
+                
                         
                 
 
