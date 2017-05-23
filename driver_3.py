@@ -7,10 +7,10 @@
 #
 
 from sys import argv
-from collections import deque
 import time
 import collections
 
+from heapq import heappush, heappop
 
 
 #get start time
@@ -18,106 +18,18 @@ start_time = time.time()
 
 ACTION = []
 
-def memory():
+#dictionary with index element of goal node
 
-   import sys
-   if sys.platform == "win32":
-       import psutil
-       print("psutil", psutil.Process().memory_info().rss)
-   else:
-       # Note: if you execute Python from cygwin,
-       # the sys.platform is "cygwin"
-       # the grading system's sys.platform is "linux2"
-       import resource
-       print("resource", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-       
-
-
-
-class Node(object):
-
-    parentNode = None
-    childs = ()
-
-    def __init__(self, parentNode, board, action, depth):
-        self.parentNode = parentNode
-        self.board = board
-        self.action = action
-        self.depth = depth
-    
-    def __eq__(self, othr):
-        return self.board == othr.board
-
-    def __hash__(self):
-        return hash((self.board))
-   
-    def calculateChilds(self):
-
-        for i,b in enumerate(self.board):
-            if b == 0:
-                indexEmptySpace = i
-                break
-
-        listNode = []
-
-        if indexEmptySpace - 3 >= 0:  #can moveUp
-
-            upBoard = list(self.board)
-            value = upBoard[indexEmptySpace - 3]
-            upBoard[indexEmptySpace] = value
-            upBoard[indexEmptySpace - 3] = 0
-
-            n = Node(self, upBoard, "UP", self.depth + 1)
-            listNode.append(n)
-
-        if indexEmptySpace + 3 <= 8: #can moveDown
-
-            downBoard = list(self.board)
-            value = downBoard[indexEmptySpace + 3]
-            downBoard[indexEmptySpace] = value
-            downBoard[indexEmptySpace + 3] = 0
-
-
-            n = Node(self, downBoard, "DOWN", self.depth + 1)
-            listNode.append(n)
-
-
-        if indexEmptySpace != 0 and indexEmptySpace != 3 and indexEmptySpace != 6: #cam moveLeft
-
-            leftBoard = list(self.board)
-            value = leftBoard[indexEmptySpace - 1]
-            leftBoard[indexEmptySpace] = value
-            leftBoard[indexEmptySpace - 1] = 0
-
-
-            n = Node(self, leftBoard, "LEFT", self.depth + 1)
-            listNode.append(n)
-
-        if indexEmptySpace != 2 and indexEmptySpace != 5 and indexEmptySpace != 8: #can moveRight
-
-            rightBoard = self.board
-            value = rightBoard[indexEmptySpace + 1]
-            rightBoard[indexEmptySpace] = value
-            rightBoard[indexEmptySpace + 1] = 0
-
-
-            n = Node(self, rightBoard, "RIGHT", self.depth + 1)
-            listNode.append(n)
-
-        t = tuple(listNode)
-        self.childs = self.childs + t
-
-    def getParentStory(self):
-        if self.parentNode is None:
-            return -2
-        if self.parentNode.action == "":
-            ACTION.append(self.action)
-            return -1
-        else:
-            ACTION.append(self.action)
-            return self.parentNode.getParentStory()
-
-
+dictGN = {}
+dictGN.update({0:[0,0]})
+dictGN.update({1:[0,1]})
+dictGN.update({2:[0,2]})
+dictGN.update({3:[1,0]})
+dictGN.update({4:[1,1]})
+dictGN.update({5:[1,2]})
+dictGN.update({6:[2,0]})
+dictGN.update({7:[2,1]})
+dictGN.update({8:[2,2]})
 
 
 if len(argv) != 3:
@@ -141,49 +53,6 @@ print("goalList")
 print(goalList)
 print()
 
-
-#print("Prova OrderedDict")
-#
-#a = []
-#for i in range(3):
-#    a.append(i)  
-#n1 = Node(None, a, "", 0)
-#
-#
-#b = []
-#b.append(3)
-#b.append(4)
-#b.append(5)
-#n2 = Node(n1, b, "UP", 1)
-#
-#
-#d = collections.OrderedDict()
-#
-#d.update({str(n1.board): n1})
-#d.update({str(n2.board): n2})
-#
-#for k,v in d.items():
-#    print(k)
-#    print(v)
-#    
-#print()
-#present = str(n2.board) in d
-#print(present)
-#
-#print("popitem")
-##nItem = d.popitem(False)  #get a tuple with FIFO
-#nItem = d.popitem(True)  #LIFO
-#print(nItem[0])
-#print()
-#for k,v in d.items():
-#    print(k)
-#    print(v)
-
-#while len(d) > 0:
-#   nItem = d.popitem(False)
-#
-#print("len dict")
-#print(len(d))
 #Open output.txt file
 f = open('output.txt', 'a')
 
@@ -196,98 +65,352 @@ if algorithm == "dfs":
 #get array of elements
 puzzleList =  [int(x) for x in puzzleString.split(',')]
 
+
+def memory():
+
+   import sys
+   if sys.platform == "win32":
+       import psutil
+       print("psutil", psutil.Process().memory_info().rss)
+   else:
+       # Note: if you execute Python from cygwin,
+       # the sys.platform is "cygwin"
+       # the grading system's sys.platform is "linux2"
+       import resource
+       print("resource", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+       
+
+
+
+class Node(object):
+
+    parentNode = None
+    childs = ()
+    f = 0
+
+    def __init__(self, parentNode, board, action, depth):
+        self.parentNode = parentNode
+        self.board = board
+        self.action = action
+        self.depth = depth
+        
+        if algorithm == "ast":
+            man = self.getHn(self.board)
+            self.f = depth + man
+    
+    def __eq__(self, othr):
+        return self.board == othr.board
+
+    def __hash__(self):
+        return hash((self.board))
+    
+    def __lt__(self, other):
+        
+        if self.f < other.f:
+            return self.f < other.f
+        else:
+            if self.action == "UP":  #Io sono UP  ---> return Io(UP)
+                return self
+            elif other.action == "UP":
+                return other
+            elif self.action == "DOWN" and (other.action == "LEFT" or other.action == "RIGHT"):
+                return self
+            elif self.action == "LEFT" and other.action == "RIGHT":
+                return self
+   
+    def calculateChilds(self):
+
+        for i,b in enumerate(self.board):
+            if b == 0:
+                indexEmptySpace = i
+                break
+
+        listNode = []
+
+        if indexEmptySpace - 3 >= 0:  #can moveUp
+
+            upBoard = list(self.board)
+            value = upBoard[indexEmptySpace - 3]
+            upBoard[indexEmptySpace] = value
+            upBoard[indexEmptySpace - 3] = 0
+            
+           
+     
+            n = Node(self, upBoard, "UP", self.depth + 1)
+            listNode.append(n)
+
+        if indexEmptySpace + 3 <= 8: #can moveDown
+
+            downBoard = list(self.board)
+            value = downBoard[indexEmptySpace + 3]
+            downBoard[indexEmptySpace] = value
+            downBoard[indexEmptySpace + 3] = 0
+
+
+
+            n = Node(self, downBoard, "DOWN", self.depth + 1)
+                
+            listNode.append(n)
+
+
+        if indexEmptySpace != 0 and indexEmptySpace != 3 and indexEmptySpace != 6: #cam moveLeft
+
+            leftBoard = list(self.board)
+            value = leftBoard[indexEmptySpace - 1]
+            leftBoard[indexEmptySpace] = value
+            leftBoard[indexEmptySpace - 1] = 0
+
+
+            n = Node(self, leftBoard, "LEFT", self.depth + 1)
+                
+            listNode.append(n)
+
+        if indexEmptySpace != 2 and indexEmptySpace != 5 and indexEmptySpace != 8: #can moveRight
+
+            rightBoard = self.board
+            value = rightBoard[indexEmptySpace + 1]
+            rightBoard[indexEmptySpace] = value
+            rightBoard[indexEmptySpace + 1] = 0
+
+
+
+            n = Node(self, rightBoard, "RIGHT", self.depth + 1)
+                
+            listNode.append(n)
+
+        t = tuple(listNode)
+        self.childs = self.childs + t
+
+    def getParentStory(self):
+        if self.parentNode is None:
+            return -2
+        if self.parentNode.action == "":
+            ACTION.append(self.action)
+            return -1
+        else:
+            ACTION.append(self.action)
+            return self.parentNode.getParentStory()
+        
+
+    def getHn(self, elements):
+        
+#        print()
+#        print("MANHATTAN")
+        manhattanDist = 0
+        
+        r = 0
+        c = 0
+        for i,n in enumerate(elements):
+            
+            if i == 3 or i == 6:
+                c = 0
+            elif i > 2:
+                r = 1
+            elif i > 5:
+                r = 2
+               
+            if n != 0:
+                
+                if n != i:
+#                    print()
+#                    print("n: " + str(n))
+                    
+                    
+                    coord = dictGN.get(n)
+                   
+#                    print("coord: " + str(coord[0]) + str(coord[1]))
+#                    print("r: " + str(r) + " c: " + str(c))
+                    
+                    #calculate distance
+                    dist = abs(coord[0] - r) + abs(coord[1] - c)
+#                    print("dist: " + str(dist))
+                    
+                    manhattanDist += dist
+                    
+            c += 1
+            
+#        print("manhattan")
+#        print(manhattanDist)
+#        print()
+        return manhattanDist
+
+
 #create initial Node
 initialNode = Node(None, puzzleList, "", 0)
 
 print(algorithm)
 
-#    #create frontier ----> double-ended queue
-#    frontier = deque()
-frontier = collections.OrderedDict()
+if algorithm == "ast":
+    frontier = []
+    heappush(frontier, (initialNode.f, initialNode))
 
-    #create explored Set
-explored = set()
-print()
-print("create explored set: " + str(explored))
+    it = 0
+    explored = set()
+    maxF = 0
+    while len(frontier) > 0:
 
-#    #add initial state to the frontier
-#    frontier.append(initialNode)
-frontier.update({str(initialNode.board):initialNode})
-maxF = 0
-
-it = 0
-#    while len(frontier) > 0:
-while len(frontier) > 0:
-
-    print("------------------")
-    print(it)
-#        currentNode = frontier.popleft()
-    currentNode = frontier.popitem(LIFO)   #tuple
-#        explored.add(str(currentNode.board))
-    explored.add(currentNode[0])
-
-
-        #check if it is the Goal State
-#        if currentNode.board == goalList:
-    if currentNode[0] == str(goalList):
-        print("Goal State Found!")
-
-#            currentNode.getParentStory()
-        if LIFO == False:
-            currentNode[1].getParentStory()
-
-            print("ACTION")
-            ACTION.reverse()
-            print(ACTION)
-
-        print("cost_of_path")
-        print(len(ACTION))
-
-        print("nodes_expanded")
+        print("------------------")
         print(it)
 
-        print("search_depth")
+        t = heappop(frontier)
+        currentNode = t[1]   
+#    print("currentNode")
+#    print(currentNode.board)
+#    print("f: " + str(currentNode.f))
+#    print()
+
+        explored.add(str(currentNode.board))
+
+        if str(currentNode.board) == str(goalList):
+            print("Goal State Found!")
+
+
+#            currentNode.getParentStory()
+            if LIFO == False:
+                currentNode.getParentStory()
+
+                print("ACTION")
+                ACTION.reverse()
+                print(ACTION)
+
+            print("cost_of_path")
+            print(len(ACTION))
+
+            print("nodes_expanded")
+            print(it)
+
+            print("search_depth")
 #            print(currentNode.depth)
-        print(currentNode[1].depth)
+            print(currentNode.depth)
 
-        print("max_search_depth")
-        print(maxF)
+            print("max_search_depth")
+            print(maxF)
 
-        print("runnin_time")
-        print(time.time() - start_time)
+            print("running_time")
+            print(time.time() - start_time)
 
-        print("max_ram_usage")
-        memory()
-        break
-
-    currentNode[1].calculateChilds()
+            print("max_ram_usage")
+            memory()
         
-    if len(currentNode[1].childs) > 0:  #bfs
-#            for c in currentNode.childs:
-        if LIFO == False:
-            for c in currentNode[1].childs:
+            break
+
+        currentNode.calculateChilds()
+        
+        if len(currentNode.childs) > 0:  
+            for c in currentNode.childs:
 
                 #check if the child State is not in the explored
                 present = str(c.board) in explored
                 if present == False:  #has not been explored
-                    present = str(c.board) in frontier.keys()
+                    present = c.board in [x[1].board for x in frontier]
                     if present == False:
                         if c.depth > maxF:
                             maxF = c.depth
-#                        frontier.append(c)
-                    frontier.update({str(c.board):c})
-        else:                                                 #dfs
-            for c in currentNode[1].childs[::-1]:
+                        heappush(frontier,(c.f, c))
+#                    print("child")
+#                    print(c.board)
+#                    print("f: " + str(c.f))
+#                    print("depth: " + str(c.depth))
+#                    print("***")
                 
-                present = str(c.board) in explored
-                if present == False:  #has not been explored
-                    present = str(c.board) in frontier.keys()
-                    if present == False:
-                        if c.depth > maxF:
-                            maxF = c.depth
+        
+        it += 1
+
+else:
+    
+
+    print("ALGHORITM BFS/DFS: "  + str(algorithm))
+    frontier = collections.OrderedDict()
+
+    #create explored Set
+    explored = set()
+    print()
+    print("create explored set: " + str(explored))
+
+#    #add initial state to the frontier
+#    frontier.append(initialNode)
+    frontier.update({str(initialNode.board):initialNode})
+    maxF = 0
+
+    it = 0
+
+   
+    while len(frontier) > 0:
+
+        print("------------------")
+        print(it)
+#        currentNode = frontier.popleft()
+        currentNode = frontier.popitem(LIFO)   #tuple
+#        explored.add(str(currentNode.board))
+        explored.add(currentNode[0])
+
+
+        #check if it is the Goal State
+#        if currentNode.board == goalList:
+        if currentNode[0] == str(goalList):
+            print("Goal State Found!")
+
+#            currentNode.getParentStory()
+            if LIFO == False:
+                currentNode[1].getParentStory()
+
+                print("ACTION")
+                ACTION.reverse()
+                print(ACTION)
+
+            print("cost_of_path")
+            print(len(ACTION))
+
+            print("nodes_expanded")
+            print(it)
+
+            print("search_depth")
+#            print(currentNode.depth)
+            print(currentNode[1].depth)
+
+            print("max_search_depth")
+            print(maxF)
+
+            print("running_time")
+            print(time.time() - start_time)
+
+            print("max_ram_usage")
+            memory()
+            break
+
+        currentNode[1].calculateChilds()
+            
+        if len(currentNode[1].childs) > 0:  #bfs
+#            for c in currentNode.childs:
+            if LIFO == False:
+                for c in currentNode[1].childs:
+
+                    #check if the child State is not in the explored
+                    present = str(c.board) in explored
+                    if present == False:  #has not been explored
+                        present = str(c.board) in frontier.keys()
+                        if present == False:
+                            if c.depth > maxF:
+                                maxF = c.depth
+#                            frontier.append(c)
+                            frontier.update({str(c.board):c})
+            else:                                                 #dfs
+                for c in currentNode[1].childs[::-1]:
+                
+                    present = str(c.board) in explored
+                    if present == False:  #has not been explored
+                        present = str(c.board) in frontier.keys()
+                        if present == False:
+                            if c.depth > maxF:
+                                maxF = c.depth
 #                        frontier.append(c)
-                    frontier.update({str(c.board):c})
-    it += 1
+                            frontier.update({str(c.board):c})
+        it += 1
+
+
+
+
+
 
 
 ##DFS
@@ -401,8 +524,6 @@ while len(frontier) > 0:
 #      
 #                
 #        it += 1
-
-
 
 
 
