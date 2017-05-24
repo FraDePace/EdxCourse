@@ -173,7 +173,6 @@ class Node(object):
             rightBoard[indexEmptySpace + 1] = 0
 
 
-
             n = Node(self, rightBoard, "Right", self.depth + 1)
                 
             listNode.append(n)
@@ -181,15 +180,22 @@ class Node(object):
         t = tuple(listNode)
         self.childs = self.childs + t
 
-    def getParentStory(self):
-        if self.parentNode is None:
-            return -2
-        elif self.parentNode.action == "":
-            ACTION.append(self.action)
-            return -1
-        else:
-            ACTION.append(self.action)
-            return self.parentNode.getParentStory()
+    def getParentStory(self,search_depth):
+        
+        ACTION.append(self.action)
+        for i in range(search_depth-1):
+            
+            ACTION.append(self.parentNode.action)
+            self = self.parentNode
+        
+#        if self.parentNode is None:
+#            return -2
+#        elif self.parentNode.action == "":
+#            ACTION.append(self.action)
+#            return -1
+#        else:
+#            ACTION.append(self.action)
+#            return self.parentNode.getParentStory()
         
 
     def getHn(self, elements):
@@ -264,7 +270,7 @@ if algorithm == "ast":
         if str(currentNode.board) == str(goalList):
             print("Goal State Found!")
 
-            currentNode.getParentStory()
+            currentNode.getParentStory(currentNode.depth)
 
             print("path_to_goal")
             ACTION.reverse()
@@ -371,7 +377,7 @@ else:
 
 #            currentNode.getParentStory()
             
-            currentNode[1].getParentStory()
+            currentNode[1].getParentStory(currentNode[1].depth)
 
             print("path_to_goal")
             ACTION.reverse()
