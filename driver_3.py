@@ -14,7 +14,7 @@ from heapq import heappush, heappop
 
 
 #get start time
-start_time = time.time()
+start_time = time.clock()
 
 ACTION = []
 
@@ -71,7 +71,8 @@ def memory():
    import sys
    if sys.platform == "win32":
        import psutil
-       print("psutil", psutil.Process().memory_info().rss)
+       ps = format(psutil.Process().memory_info().rss, '.8f')
+       print("psutil: ", str(ps))
    else:
        # Note: if you execute Python from cygwin,
        # the sys.platform is "cygwin"
@@ -109,13 +110,13 @@ class Node(object):
         if self.f < other.f:
             return self.f < other.f
         else:
-            if self.action == "UP":  #Io sono UP  ---> return Io(UP)
+            if self.action == "Up":  #Io sono UP  ---> return Io(UP)
                 return self
-            elif other.action == "UP":
+            elif other.action == "Up":
                 return other
-            elif self.action == "DOWN" and (other.action == "LEFT" or other.action == "RIGHT"):
+            elif self.action == "Down" and (other.action == "Left" or other.action == "Right"):
                 return self
-            elif self.action == "LEFT" and other.action == "RIGHT":
+            elif self.action == "Left" and other.action == "Right":
                 return self
    
     def calculateChilds(self):
@@ -134,9 +135,8 @@ class Node(object):
             upBoard[indexEmptySpace] = value
             upBoard[indexEmptySpace - 3] = 0
             
-           
-     
-            n = Node(self, upBoard, "UP", self.depth + 1)
+
+            n = Node(self, upBoard, "Up", self.depth + 1)
             listNode.append(n)
 
         if indexEmptySpace + 3 <= 8: #can moveDown
@@ -148,7 +148,7 @@ class Node(object):
 
 
 
-            n = Node(self, downBoard, "DOWN", self.depth + 1)
+            n = Node(self, downBoard, "Down", self.depth + 1)
                 
             listNode.append(n)
 
@@ -161,7 +161,7 @@ class Node(object):
             leftBoard[indexEmptySpace - 1] = 0
 
 
-            n = Node(self, leftBoard, "LEFT", self.depth + 1)
+            n = Node(self, leftBoard, "Left", self.depth + 1)
                 
             listNode.append(n)
 
@@ -174,7 +174,7 @@ class Node(object):
 
 
 
-            n = Node(self, rightBoard, "RIGHT", self.depth + 1)
+            n = Node(self, rightBoard, "Right", self.depth + 1)
                 
             listNode.append(n)
 
@@ -184,7 +184,7 @@ class Node(object):
     def getParentStory(self):
         if self.parentNode is None:
             return -2
-        if self.parentNode.action == "":
+        elif self.parentNode.action == "":
             ACTION.append(self.action)
             return -1
         else:
@@ -266,12 +266,12 @@ if algorithm == "ast":
 
 
 #            currentNode.getParentStory()
-            if LIFO == False:
-                currentNode.getParentStory()
+            
+            currentNode.getParentStory()
 
-                print("ACTION")
-                ACTION.reverse()
-                print(ACTION)
+            print("ACTION")
+            ACTION.reverse()
+            print(ACTION)
 
             print("cost_of_path")
             print(len(ACTION))
@@ -287,7 +287,9 @@ if algorithm == "ast":
             print(maxF)
 
             print("running_time")
-            print(time.time() - start_time)
+            t = time.clock() - start_time
+            tFormat = format(t, '.8f')
+            print(tFormat)
 
             print("max_ram_usage")
             memory()
@@ -302,18 +304,31 @@ if algorithm == "ast":
                 #check if the child State is not in the explored
                 present = str(c.board) in explored
                 if present == False:  #has not been explored
-                    present = c.board in [x[1].board for x in frontier]
+                
+                
+                    index = 0
+                    present = False
+                    print("frontier size: " + str(len(frontier)))
+                    for ff in frontier:
+                        if ff[1].board == c.board:
+                            present = True
+                            print(present)
+                            if c.f < ff[1].f:
+                                ff[1].f = c.f
+                                frontier[index] = (ff[1].f, ff[1])
+                            break
+                        index += 1
                     if present == False:
                         if c.depth > maxF:
                             maxF = c.depth
                         heappush(frontier,(c.f, c))
-#                    print("child")
-#                    print(c.board)
-#                    print("f: " + str(c.f))
-#                    print("depth: " + str(c.depth))
-#                    print("***")
-                
-        
+               
+#                    present = c.board in [x[1].board for x in frontier]
+#                    if present == False:
+#                        if c.depth > maxF:
+#                            maxF = c.depth
+#                        heappush(frontier,(c.f, c))
+                        
         it += 1
 
 else:
@@ -351,12 +366,12 @@ else:
             print("Goal State Found!")
 
 #            currentNode.getParentStory()
-            if LIFO == False:
-                currentNode[1].getParentStory()
+            
+            currentNode[1].getParentStory()
 
-                print("ACTION")
-                ACTION.reverse()
-                print(ACTION)
+            print("ACTION")
+            ACTION.reverse()
+            print(ACTION)
 
             print("cost_of_path")
             print(len(ACTION))
@@ -372,7 +387,9 @@ else:
             print(maxF)
 
             print("running_time")
-            print(time.time() - start_time)
+            t = time.clock() - start_time
+            tFormat = format(t, '.8f')
+            print(tFormat)
 
             print("max_ram_usage")
             memory()
@@ -405,6 +422,7 @@ else:
                                 maxF = c.depth
 #                        frontier.append(c)
                             frontier.update({str(c.board):c})
+                        
         it += 1
 
 
